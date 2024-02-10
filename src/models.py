@@ -3,18 +3,15 @@ from tortoise import fields
 
 
 class User(Model):
-    id = fields.IntField(pk=True)
     username = fields.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.username
 
 class Purshare_types(Model):
-    id = fields.IntField(pk=True)
     name = fields.CharField(max_length=255)
 
 class Purchase(Model):
-    id = fields.IntField(pk=True)
     buyer = fields.ForeignKeyField('models.User', related_name='buyer_purchases')
     seller = fields.ForeignKeyField('models.User', related_name='seller_purchases')
     purshare_type = fields.ForeignKeyField('models.Purshare_types')
@@ -23,7 +20,6 @@ class Purchase(Model):
 
 
 class UserDetail(Model):
-    id = fields.IntField(pk=True)
     user = fields.ForeignKeyField('models.User')
     last_login = fields.DatetimeField()
     last_register_date = fields.DatetimeField()
@@ -35,7 +31,6 @@ class UserDetail(Model):
         return self.username
 
 class Shell(Model):
-    id = fields.IntField(pk=True)
     machine_hostname = fields.CharField(max_length=255)
     country = fields.CharField(max_length=255)
     http_type = fields.CharField(max_length=255)
@@ -54,7 +49,6 @@ class Shell(Model):
         return self.id
 
 class Cpanel(Model):
-    id = fields.IntField(pk=True)
     country = fields.CharField(max_length=255)
     http_type = fields.CharField(max_length=255)
     tld = fields.CharField(max_length=255)
