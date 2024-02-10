@@ -86,7 +86,7 @@ async def process_cpanel_data(data):
             username=username
         )
 
-        cpanel, _ = await Cpanel.get_or_create(
+        await Cpanel.get_or_create(
             id=int(_id),
             user = seller_user,
             country = country,
@@ -98,7 +98,6 @@ async def process_cpanel_data(data):
             price = float(price), # we store 8.55 as 855 so we don't need float
         )
 
-        await cpanel.save()
 
 async def process_seller_sales_data(data, seller_username):
     soup = BeautifulSoup(data)
