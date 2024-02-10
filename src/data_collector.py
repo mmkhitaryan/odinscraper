@@ -100,9 +100,10 @@ async def process_cpanel_data(data):
 
 
 async def process_seller_sales_data(data, seller_username):
-    soup = BeautifulSoup(data)
+    soup = BeautifulSoup(data, features="html.parser")
 
     for row in soup.find_all('tr'):
+        _id = row.find_all('td')[0].text
         buyer_username = row.find_all('td')[3].text
         sold_date = datetime.datetime.strptime(row.find_all('td')[1].text,"%Y-%m-%d %H:%M:%S")
         purshare_type = row.find_all('td')[2].text # premium_cpanel
@@ -132,7 +133,7 @@ async def process_seller_sales_data(data, seller_username):
 
 
 async def process_seller_details_data(data):
-    soup = BeautifulSoup(data)
+    soup = BeautifulSoup(data, features="html.parser")
     username = None
     last_login = None
     last_register_date = None
