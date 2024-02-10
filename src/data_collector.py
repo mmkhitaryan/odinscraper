@@ -1,6 +1,6 @@
 from tortoise import Tortoise, run_async
 from aiohttp import web
-from models import User, Shell, Cpanel, UserDetail
+from models import User, Shell, Cpanel, UserDetail, Purshare_types, Purchase
 from bs4 import BeautifulSoup
 import cssutils
 
@@ -100,7 +100,39 @@ async def process_cpanel_data(data):
 
         await cpanel.save()
 
-async def process_seller_data(data):
+async def process_seller_sales_data(data, seller_username):
+    soup = BeautifulSoup(data)
+
+    for row in soup.find_all('tr'):
+        buyer_username = row.find_all('td')[3].text
+        sold_date = datetime.datetime.strptime(row.find_all('td')[1].text,"%Y-%m-%d %H:%M:%S")
+        purshare_type = row.find_all('td')[2].text # premium_cpanel
+        review = row.find_all('td')[4].text
+
+        seller_user, _ = await User.get_or_create(
+            username=seller_username
+        )
+
+        buyer_user, _ = await User.get_or_create(
+            username=buyer_username
+        )
+
+        purshare_type, _ = await Purshare_types.get_or_create(
+            name=purshare_type
+        )
+
+        await Purchase.get_or_create(
+            sold_date=sold_date,
+            review=review,
+            purshare_type=purshare_type,
+            buyer=buyer_user,
+            seller=seller_user,
+        )
+
+
+
+
+async def process_seller_details_data(data):
     soup = BeautifulSoup(data)
     username = None
     last_login = None
@@ -150,11 +182,11 @@ async def hello(request):
     json_result = await request.json()
 
     if json_result['path'] == 'seller_sales':
-        await process_seller_data(json_result['response'])
+        await process_seller_sales_data(json_result['response'], json_result['seller_username'])
         return web.Response(text="Hello, world")
 
     if json_result['path'] == 'seller_details':
-        await process_seller_data(json_result['response'])
+        await process_seller_details_data(json_result['response'])
         return web.Response(text="Hello, world")
 
     data = json.loads(json_result['response'])['data']
@@ -171,5 +203,5 @@ app = web.Application(middlewares=[cors_middleware])
 app.add_routes([web.post('/', hello)])
 
 if __name__ == '__main__':
-    web.run_app(app)
+    web.run_app(app, port=8081)
 

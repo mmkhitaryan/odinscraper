@@ -9,6 +9,18 @@ class User(Model):
     def __str__(self):
         return self.username
 
+class Purshare_types(Model):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=255)
+
+class Purchase(Model):
+    id = fields.IntField(pk=True)
+    buyer = fields.ForeignKeyField('models.User', related_name='buyer_purchases')
+    seller = fields.ForeignKeyField('models.User', related_name='seller_purchases')
+    purshare_type = fields.ForeignKeyField('models.Purshare_types')
+    review = fields.CharField(max_length=900)
+    sold_date = fields.DatetimeField()
+
 
 class UserDetail(Model):
     id = fields.IntField(pk=True)

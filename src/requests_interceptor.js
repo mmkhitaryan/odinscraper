@@ -1,8 +1,9 @@
-const COLLECTOR_URL = "https://f887-95-56-217-235.ngrok-free.app"
+const COLLECTOR_URL = "https://dab3-95-56-217-235.ngrok-free.app"
 
 // Save a reference to the original XMLHttpRequest object
 if (window.location.pathname.startsWith("/profile-Seller")){
     var tbodyContent = document.querySelector('tbody').innerHTML;
+    var seller_username = document.title.split("-")[1].trim();
 
     if (window.location.pathname.endsWith("do=sale")){
 
@@ -12,7 +13,7 @@ if (window.location.pathname.startsWith("/profile-Seller")){
                 'Content-Type': 'application/json', // Specify that you are sending JSON data
                 // You can include additional headers if required
             },
-            body: JSON.stringify({ response: tbodyContent, path: 'seller_sales' }) 
+            body: JSON.stringify({ response: tbodyContent, path: 'seller_sales', seller_username: seller_username }) 
         })
     }
 
