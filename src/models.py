@@ -17,6 +17,7 @@ class Purchase(Model):
     purshare_type = fields.ForeignKeyField('models.Purshare_types')
     review = fields.CharField(max_length=900)
     sold_date = fields.DatetimeField()
+    created_at = fields.DatetimeField(auto_now_add=True)
 
 
 class UserDetail(Model):

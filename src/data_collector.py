@@ -1,4 +1,4 @@
-from tortoise import Tortoise, run_async
+from tortoise import Tortoise, run_async, timezone
 from aiohttp import web
 from models import User, Shell, Cpanel, UserDetail, Purshare_types, Purchase
 from bs4 import BeautifulSoup
@@ -47,13 +47,13 @@ async def process_shell_data(data):
 
         username = re.sub('<[^<]+?>', '', row[13]).strip()
         price = row[15]
-        post_date = datetime.datetime.strptime(row[16],"%d/%m/%Y %I:%M:%S %p")
+        post_date = timezone.make_aware(datetime.datetime.strptime(row[16],"%d/%m/%Y %I:%M:%S %p"))
 
         seller_user, _ = await User.get_or_create(
             username=username
         )
 
-        shell, _ = await Shell.get_or_create(
+        await Shell.update_or_create(
             id=int(_id),
             user = seller_user,
             machine_hostname = machine_hostname,
@@ -67,7 +67,6 @@ async def process_shell_data(data):
             post_date = post_date
         )
 
-        await shell.save()
 
 async def process_cpanel_data(data):
     for row in data:
@@ -86,7 +85,7 @@ async def process_cpanel_data(data):
             username=username
         )
 
-        await Cpanel.get_or_create(
+        await Cpanel.update_or_create(
             id=int(_id),
             user = seller_user,
             country = country,
@@ -95,7 +94,7 @@ async def process_cpanel_data(data):
             masked_domain = masked_domain,
             isp = isp,
             cms = cms,
-            price = float(price), # we store 8.55 as 855 so we don't need float
+            price = float(price),
         )
 
 
@@ -105,7 +104,7 @@ async def process_seller_sales_data(data, seller_username):
     for row in soup.find_all('tr'):
         _id = row.find_all('td')[0].text
         buyer_username = row.find_all('td')[3].text
-        sold_date = datetime.datetime.strptime(row.find_all('td')[1].text,"%Y-%m-%d %H:%M:%S")
+        sold_date = timezone.make_aware(datetime.datetime.strptime(row.find_all('td')[1].text,"%Y-%m-%d %H:%M:%S"))
         purshare_type = row.find_all('td')[2].text # premium_cpanel
         review = row.find_all('td')[4].text
 
@@ -121,7 +120,8 @@ async def process_seller_sales_data(data, seller_username):
             name=purshare_type
         )
 
-        await Purchase.get_or_create(
+        await Purchase.update_or_create(
+            id=int(_id),
             sold_date=sold_date,
             review=review,
             purshare_type=purshare_type,
@@ -149,10 +149,10 @@ async def process_seller_details_data(data):
             username = value.text
         
         if key == 'Last Login':
-            last_login = datetime.datetime.strptime(value.text,"%d/%m/%Y %I:%M:%S %p")
+            last_login = timezone.make_aware(datetime.datetime.strptime(value.text,"%d/%m/%Y %I:%M:%S %p"))
         
         if key == 'Register Date':
-            last_register_date = datetime.datetime.strptime(value.text,"%d/%m/%Y")
+            last_register_date = timezone.make_aware(datetime.datetime.strptime(value.text,"%d/%m/%Y"))
         
         if key == 'Total Sales':
             tatal_sales = int(float(value.text.replace("$", "").strip()))
@@ -167,15 +167,15 @@ async def process_seller_details_data(data):
     seller_user, _ = await User.get_or_create(
         username=username
     )
-    if seller_user:
-        await UserDetail.get_or_create(
-            user=seller_user,
-            last_login=last_login,
-            last_register_date=last_register_date,
-            tatal_sales=tatal_sales,
-            total_sold_items=total_sold_items,
-            int_rating=int_rating
-        )
+
+    await UserDetail.update_or_create(
+        user=seller_user,
+        last_login=last_login,
+        last_register_date=last_register_date,
+        tatal_sales=tatal_sales,
+        total_sold_items=total_sold_items,
+        int_rating=int_rating
+    )
 
 
 async def hello(request):

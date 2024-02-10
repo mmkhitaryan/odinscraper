@@ -2,7 +2,7 @@
 
 ## General description
 The odinshop is a marketplace for cracked websites/machines. They sell very cheap access to the websites and machines which were cracked
-probably by using bruteforce. The most popular types of items are: cpanel, shell, mailer.
+probably by using bruteforce. The most popular types of items are: cpanel, shell, mailer. They sell so fast, that when you reload the first page, all items are sold already.
 
 ## Cpanel
 Cpanel is admin dashboard for hosting websites. It allowd website administrators to manage website using web GUI.
