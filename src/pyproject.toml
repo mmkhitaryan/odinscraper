@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "odinscraper"
+version = "0.1.0"
+description = ""
+authors = ["Marat Mkhitaryan <marat@mhkitaryan.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiohttp = "^3.9.3"
+tortoise-orm = "^0.20.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
