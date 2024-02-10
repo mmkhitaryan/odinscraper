@@ -71,7 +71,6 @@ async def process_data(data):
 async def hello(request):
     json_result = await request.json()
     data = json.loads(json_result['response'])['data']
-    breakpoint()
 
     await process_data(data)
 
