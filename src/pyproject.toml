@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.11"
 aiohttp = "^3.9.3"
 tortoise-orm = "^0.20.0"
+beautifulsoup4 = "^4.12.3"
+cssutils = "^2.9.0"
 
 
 [build-system]

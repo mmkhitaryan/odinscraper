@@ -9,6 +9,19 @@ class User(Model):
     def __str__(self):
         return self.username
 
+
+class UserDetail(Model):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField('models.User')
+    last_login = fields.DatetimeField()
+    last_register_date = fields.DatetimeField()
+    tatal_sales = fields.IntField()
+    total_sold_items = fields.IntField()
+    int_rating = fields.IntField()
+
+    def __str__(self):
+        return self.username
+
 class Shell(Model):
     id = fields.IntField(pk=True)
     machine_hostname = fields.CharField(max_length=255)

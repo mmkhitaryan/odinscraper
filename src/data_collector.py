@@ -1,6 +1,9 @@
 from tortoise import Tortoise, run_async
 from aiohttp import web
-from models import User, Shell, Cpanel
+from models import User, Shell, Cpanel, UserDetail
+from bs4 import BeautifulSoup
+import cssutils
+
 import json
 import re
 import datetime
@@ -97,18 +100,72 @@ async def process_cpanel_data(data):
 
         await cpanel.save()
 
+async def process_seller_data(data):
+    soup = BeautifulSoup(data)
+    username = None
+    last_login = None
+    last_register_date = None
+    tatal_sales = None
+    total_sold_items = None
+    int_rating = None
+
+    for row in soup.find_all('tr'):
+        key = row.find('th').text
+        value = row.find('td')
+
+        if key == 'Seller':
+            username = value.text
+        
+        if key == 'Last Login':
+            last_login = datetime.datetime.strptime(value.text,"%d/%m/%Y %I:%M:%S %p")
+        
+        if key == 'Register Date':
+            last_register_date = datetime.datetime.strptime(value.text,"%d/%m/%Y")
+        
+        if key == 'Total Sales':
+            tatal_sales = int(float(value.text.replace("$", "").strip()))
+        
+        if key == 'Total Sold Items':
+            total_sold_items = int(value.text)
+        
+        if key == 'Average Rating':
+            percent_dating = cssutils.parseString(value.find("style").text).cssRules[0].style.width.replace("%", "")
+            int_rating = int(float(percent_dating))
+
+    seller_user, _ = await User.get_or_create(
+        username=username
+    )
+    if seller_user:
+        await UserDetail.get_or_create(
+            user=seller_user,
+            last_login=last_login,
+            last_register_date=last_register_date,
+            tatal_sales=tatal_sales,
+            total_sold_items=total_sold_items,
+            int_rating=int_rating
+        )
+
 
 async def hello(request):
     json_result = await request.json()
+
+    if json_result['path'] == 'seller_sales':
+        await process_seller_data(json_result['response'])
+        return web.Response(text="Hello, world")
+
+    if json_result['path'] == 'seller_details':
+        await process_seller_data(json_result['response'])
+        return web.Response(text="Hello, world")
+
     data = json.loads(json_result['response'])['data']
 
     if json_result['path'] == 'divPage3.html':
         await process_shell_data(data)
+        return web.Response(text="Hello, world")
     
     if json_result['path'] == 'divPage2.html':
         await process_cpanel_data(data)
-
-    return web.Response(text="Hello, world")
+        return web.Response(text="Hello, world")
 
 app = web.Application(middlewares=[cors_middleware])
 app.add_routes([web.post('/', hello)])
