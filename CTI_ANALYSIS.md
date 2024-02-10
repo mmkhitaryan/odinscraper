@@ -52,3 +52,5 @@ It automatically detects the page its on, and sends only the suitable for scrapi
 The script is supposed to be run on each page load, like content_scripts of webextensions or userscript of tampermonkey. Bur for simplicity you can run the script in devtools. For an example open the page where shells are sold, and run the script. The pagination of the table works by sending AJAX requests, they happen each time you go to other page.
 
 I embedded the sample src/db.sqlite which has the scraped data. You can open it using online sqlite viewr or download sqlitebrowser.
+
+Right now scraper works by scraping all the user sees. To make the scraper automated, we just need to create scraping strategy, which will .click() links, change the page.
