@@ -1,6 +1,6 @@
 from tortoise import Tortoise, run_async
 from aiohttp import web
-from models import User, Shell
+from models import User, Shell, Cpanel
 import json
 import re
 import datetime
@@ -31,7 +31,7 @@ async def init():
 # run_async is a helper function to run simple async Tortoise scripts.
 run_async(init())
 
-async def process_data(data):
+async def process_shell_data(data):
     for row in data:
         _id = row[1]
         machine_hostname = re.sub('<[^<]+?>', '', row[2]).strip() # Linux - PHP 7.4.33 Linux yisu-648bf556cc4e0 3.10.0-862.14.4.el7.x86_64 #1 SMP Wed Sep 26 15:12:11 UTC 2018 x86_64
@@ -66,13 +66,47 @@ async def process_data(data):
 
         await shell.save()
 
+async def process_cpanel_data(data):
+    for row in data:
+        _id = row[1]
+        country = re.sub('<[^<]+?>', '', row[2]).strip() # Brazil
+        type = re.sub('<[^<]+?>', '', row[3]).strip()
+        tld = row[4]
+        masked_domain = row[5]
+        isp = row[6]
+        cms = re.sub('<[^<]+?>', '', row[7]).strip()
+
+        username = re.sub('<[^<]+?>', '', row[12]).strip()
+        price = row[14]
+
+        seller_user, _ = await User.get_or_create(
+            username=username
+        )
+
+        cpanel, _ = await Cpanel.get_or_create(
+            id=int(_id),
+            user = seller_user,
+            country = country,
+            http_type = type=='http',
+            tld = tld,
+            masked_domain = masked_domain,
+            isp = isp,
+            cms = cms,
+            price = float(price), # we store 8.55 as 855 so we don't need float
+        )
+
+        await cpanel.save()
 
 
 async def hello(request):
     json_result = await request.json()
     data = json.loads(json_result['response'])['data']
 
-    await process_data(data)
+    if json_result['path'] == 'divPage3.html':
+        await process_shell_data(data)
+    
+    if json_result['path'] == 'divPage2.html':
+        await process_cpanel_data(data)
 
     return web.Response(text="Hello, world")
 
